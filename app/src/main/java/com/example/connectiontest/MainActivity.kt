@@ -4,11 +4,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import java.io.InputStream
 import java.io.OutputStream
-import java.io.OutputStreamWriter
 import java.net.URL
-import java.util.*
 import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
 import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity()  {
@@ -22,17 +22,20 @@ class MainActivity : AppCompatActivity()  {
         btnConnect.setOnClickListener {
             thread {
                 try {
-                    connection = url.openConnection() as HttpsURLConnection?
-                    connection?.doOutput = true
-                    connection?.connectTimeout = 10000
-                    connection?.readTimeout = 60000
+                    if (connection == null) {
+                        connection = url.openConnection() as HttpsURLConnection?
+                        connection?.doInput = true
+                        connection?.connectTimeout = 10000
+                        connection?.readTimeout = 60000
+                        connection?.useCaches = false
+
+                        SSLContext.getInstance("TLSv1.2").also {
+                            it.init(null, null, null)
+                            connection?.sslSocketFactory = it.socketFactory
+                        }
+                    }
+
                     connection?.connect()
-
-                    val outputStream: OutputStream? = connection?.outputStream
-                    outputStream?.write(10)
-                    outputStream?.flush()
-                    outputStream?.close()
-
 
                     Log.d("URL_connect", "Successfully connected")
                 } catch (e: Exception) {
@@ -45,7 +48,22 @@ class MainActivity : AppCompatActivity()  {
             thread {
                 try {
 
-                    Log.d("URL_send", "Successfully sent\n Response body: ")
+                    Log.d("URL_send","Connection is $connection")
+
+//                    val outputStream: OutputStream? = connection?.outputStream
+//                    val writeStream = outputStream?.write(10)
+//
+//                    outputStream?.flush()
+//                    outputStream?.close()
+
+                    val inputStream: InputStream? = connection?.inputStream
+                    val readStream = inputStream?.read()
+                    inputStream?.close()
+
+                    connection?.disconnect()
+                    connection = null
+
+                    Log.d("URL_send", "Successfully sent\n Response body: $readStream")
                 } catch (e: Exception) {
                     Log.e("URL_send ", "threw $e")
                 }
@@ -68,7 +86,7 @@ class MainActivity : AppCompatActivity()  {
     }
 
     companion object {
-        val url = URL("https://www.google.com")
+        val url = URL("https://www.amazon.com.br/")
         var connection: HttpsURLConnection? = null
     }
 
