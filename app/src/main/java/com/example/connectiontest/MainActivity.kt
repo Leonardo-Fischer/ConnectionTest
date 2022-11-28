@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import java.io.InputStream
-import java.io.OutputStream
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
@@ -50,12 +49,6 @@ class MainActivity : AppCompatActivity()  {
 
                     Log.d("URL_send","Connection is $connection")
 
-//                    val outputStream: OutputStream? = connection?.outputStream
-//                    val writeStream = outputStream?.write(10)
-//
-//                    outputStream?.flush()
-//                    outputStream?.close()
-
                     val inputStream: InputStream? = connection?.inputStream
                     val readStream = inputStream?.read()
                     inputStream?.close()
@@ -69,20 +62,6 @@ class MainActivity : AppCompatActivity()  {
                 }
             }
         }
-
-
-//        btnSend.setOnClickListener {
-//            thread {
-//                try {
-//                    val response = url.openStream()
-//                    val scanner = Scanner(response)
-//                    val responseBody = scanner.useDelimiter("\\A").next()
-//                    Log.d("URL_send", "Successfully sent\n Response body: $responseBody")
-//                } catch (e: Exception) {
-//                    Log.e("URL_send ", "threw $e")
-//                }
-//            }
-//        }
     }
 
     companion object {
